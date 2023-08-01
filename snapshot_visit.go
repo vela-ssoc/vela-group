@@ -1,7 +1,6 @@
 package group
 
 import (
-	"github.com/vela-ssoc/vela-kit/opcode"
 	"github.com/vela-ssoc/vela-kit/vela"
 )
 
@@ -38,7 +37,13 @@ func (snap *snapshot) Delete(bkt vela.Bucket) {
 }
 
 func (snap *snapshot) Report() {
-	if snap.enable && snap.report.len() > 0 {
-		xEnv.TnlSend(opcode.OpGroupDiff, snap.report)
+	if snap.enable && snap.report.len() <= 0 {
+		return
+		//xEnv.TnlSend(opcode.OpGroupDiff, snap.report)
+	}
+
+	e := xEnv.Push("/api/v1/broker/collect/agent/group/diff", snap.report)
+	if e != nil {
+		xEnv.Errorf("push group info fail %v", e)
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	cond "github.com/vela-ssoc/vela-cond"
 	"github.com/vela-ssoc/vela-kit/lua"
-	"github.com/vela-ssoc/vela-kit/opcode"
 	"github.com/vela-ssoc/vela-kit/pipe"
 	"sync/atomic"
 	"time"
@@ -16,9 +15,9 @@ type snapshot struct {
 	err      error
 	bkt      []string
 	data     []Group
-	onCreate *pipe.Px
-	onDelete *pipe.Px
-	onUpdate *pipe.Px
+	onCreate *pipe.Chains
+	onDelete *pipe.Chains
+	onUpdate *pipe.Chains
 	ticker   *time.Ticker
 	co       *lua.LState
 	current  map[string]Group
@@ -147,7 +146,8 @@ func (snap *snapshot) do(enable bool) {
 	snap.Delete(bkt)
 
 	if !enable {
-		xEnv.TnlSend(opcode.OpGroupFull, snap.data)
+		xEnv.Push("/api/v1/broker/collect/agent/group/full", snap.data)
+		//xEnv.TnlSend(opcode.OpGroupFull, snap.data)
 		snap.reset()
 		return
 	}
